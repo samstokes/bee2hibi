@@ -23,7 +23,7 @@ module Jira
         @conn.get "/rest/api/2/issue/#{CGI.escape key}"
       end
 
-      parse_issue(response)
+      parse_issue_json(response.body)
     end
 
     private
@@ -34,15 +34,29 @@ module Jira
     end
 
     def parse_error(response)
-      JSON.parse(response.body).fetch('errorMessages').join(', ')
+      case response.status
+      when 400
+        "bad request: #{parse_errors_from_body(response).join(', ')}"
+      when 401
+        "unauthorized: #{parse_errors_from_body(response).join(', ')}"
+      else
+        "status #{response.status}"
+      end
     rescue
-      "unexpected response format: #{response.body}"
+      "unexpected response: #{response.inspect}"
     end
 
-    def parse_issue(response)
-      properties = JSON.parse(response.body)
-      fields = properties.fetch('fields')
+    def parse_errors_from_body(response)
+      JSON.parse(response.body).fetch('errorMessages')
+    end
 
+    def parse_issue_json(json)
+      properties = JSON.parse(json)
+      parse_issue(properties)
+    end
+
+    def parse_issue(properties)
+      fields = properties.fetch('fields')
       Issue.new(
         properties.fetch('key'),
         fields.fetch('summary')
