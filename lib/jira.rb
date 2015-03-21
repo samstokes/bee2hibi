@@ -27,6 +27,18 @@ module Jira
       parse_issue_json(response.body)
     end
 
+    def my_issues(sprint)
+      jql = jql_my_issues(sprint)
+      search(jql)
+    end
+
+    def search(jql)
+      response = checking_success do
+        @conn.get '/rest/api/2/search', jql: jql
+      end
+      parse_issues_json(response.body)
+    end
+
     private
     def checking_success
       yield.tap do |response|
@@ -62,6 +74,27 @@ module Jira
         key: properties.fetch('key'),
         summary: fields.fetch('summary'),
       )
+    end
+
+    def parse_issues_json(json)
+      properties = JSON.parse(json)
+      issues = properties.fetch('issues')
+      issues.map do |issue_properties|
+        parse_issue(issue_properties)
+      end
+    end
+
+    def jql_my_issues(sprint)
+      assignee_p = 'assignee=currentUser()'
+      in_progress_p = 'status NOT IN (Open, Reopened, Closed, Completed, Blocked)'
+      relevant_p = if sprint
+        current_sprint_p = "sprint='#{sprint}' AND status IN (Open, Reopened)"
+        "(#{current_sprint_p}) OR (#{in_progress_p})"
+      else
+        in_progress_p
+      end
+      orders = ['status']
+      "(#{assignee_p}) AND (#{relevant_p}) ORDER BY #{orders.join(', ')}"
     end
   end
 end
