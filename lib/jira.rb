@@ -10,6 +10,8 @@ module Jira
   end
 
   class Client
+    API_BASE = '/rest/api/2'
+
     def initialize(opts = {})
       server = opts.fetch :server
       user = opts.fetch :user
@@ -21,7 +23,7 @@ module Jira
 
     def issue(key)
       response = checking_success do
-        @conn.get "/rest/api/2/issue/#{CGI.escape key}"
+        @conn.get "#{API_BASE}/issue/#{CGI.escape key}"
       end
 
       parse_issue_json(response.body)
@@ -34,7 +36,7 @@ module Jira
 
     def search(jql)
       response = checking_success do
-        @conn.get '/rest/api/2/search', jql: jql
+        @conn.get "#{API_BASE}/search", jql: jql
       end
       parse_issues_json(response.body)
     end
