@@ -1,11 +1,12 @@
 require 'cgi'
 require 'faraday'
 require 'json'
+require 'ostruct'
 
 module Jira
   class Error < RuntimeError; end
 
-  class Issue < Struct.new(:key, :summary)
+  class Issue < OpenStruct
   end
 
   class Client
@@ -58,8 +59,8 @@ module Jira
     def parse_issue(properties)
       fields = properties.fetch('fields')
       Issue.new(
-        properties.fetch('key'),
-        fields.fetch('summary')
+        key: properties.fetch('key'),
+        summary: fields.fetch('summary'),
       )
     end
   end
