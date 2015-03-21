@@ -73,7 +73,17 @@ module Jira
       Issue.new(
         key: properties.fetch('key'),
         summary: fields.fetch('summary'),
+        status: parse_status(fields.fetch('status')),
+        assignee: parse_user(fields.fetch('assignee')),
       )
+    end
+
+    def parse_status(properties)
+      properties.fetch('name')
+    end
+
+    def parse_user(properties)
+      properties.fetch('name')
     end
 
     def parse_issues_json(json)
