@@ -7,17 +7,25 @@ module Jira
   class Error < RuntimeError; end
 
   class Issue < OpenStruct
+    def initialize(url_base, *args)
+      @url_base = url_base
+      super(*args)
+    end
+
+    def web_url
+      "#@url_base/browse/#{CGI.escape key}"
+    end
   end
 
   class Client
     API_BASE = '/rest/api/2'
 
     def initialize(opts = {})
-      server = opts.fetch :server
+      @server = opts.fetch :server
       user = opts.fetch :user
       password = opts.fetch :password
 
-      @conn = Faraday.new(server, ssl: {verify: false})
+      @conn = Faraday.new(@server, ssl: {verify: false})
       @conn.basic_auth(user, password)
     end
 
@@ -72,7 +80,7 @@ module Jira
 
     def parse_issue(properties)
       fields = properties.fetch('fields')
-      Issue.new(
+      Issue.new(@server,
         key: properties.fetch('key'),
         summary: fields.fetch('summary'),
         status: parse_status(fields.fetch('status')),
