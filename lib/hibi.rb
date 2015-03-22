@@ -40,7 +40,7 @@ module Hibi
       password = opts.fetch :password
       @api_base = opts[:api_base] || '/api'
 
-      @conn = Faraday.new(server, ssl: {verify: false})
+      @conn = Faraday.new(server)
       @conn.basic_auth(user, password)
     end
 
