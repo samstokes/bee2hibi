@@ -20,13 +20,15 @@ module Jira
   class Client
     API_BASE = '/rest/api/2'
 
+    attr_reader :user
+
     def initialize(opts = {})
       @server = opts.fetch :server
-      user = opts.fetch :user
+      @user = opts.fetch :user
       password = opts.fetch :password
 
       @conn = Faraday.new(@server, ssl: {verify: false})
-      @conn.basic_auth(user, password)
+      @conn.basic_auth(@user, password)
     end
 
     def issue(key)
