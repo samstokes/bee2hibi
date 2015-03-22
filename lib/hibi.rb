@@ -34,12 +34,11 @@ module Hibi
   end
 
   class Client
-    API_BASE = '/api'
-
     def initialize(opts = {})
       server = opts.fetch :server
       user = opts.fetch :user
       password = opts.fetch :password
+      @api_base = opts[:api_base] || '/api'
 
       @conn = Faraday.new(server, ssl: {verify: false})
       @conn.basic_auth(user, password)
@@ -47,7 +46,7 @@ module Hibi
 
     def my_ext_tasks(ext_source)
       response = checking_success do
-        @conn.get("#{API_BASE}/ext_tasks/#{CGI.escape ext_source}")
+        @conn.get("#@api_base/ext_tasks/#{CGI.escape ext_source}")
       end
 
       parse_tasks_json(response.body)
@@ -55,7 +54,7 @@ module Hibi
 
     def create_or_update_task(task)
       checking_success do
-        @conn.post("#{API_BASE}/tasks", task.to_json)
+        @conn.post("#@api_base/tasks", task.to_json)
       end
     end
 

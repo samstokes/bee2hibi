@@ -18,14 +18,13 @@ module Jira
   end
 
   class Client
-    API_BASE = '/rest/api/2'
-
     attr_reader :user
 
     def initialize(opts = {})
       @server = opts.fetch :server
       @user = opts.fetch :user
       password = opts.fetch :password
+      @api_base = opts[:api_base] || '/rest/api/2'
 
       @conn = Faraday.new(@server, ssl: {verify: false})
       @conn.basic_auth(@user, password)
@@ -33,7 +32,7 @@ module Jira
 
     def issue(key)
       response = checking_success do
-        @conn.get "#{API_BASE}/issue/#{CGI.escape key}"
+        @conn.get "#@api_base/issue/#{CGI.escape key}"
       end
 
       parse_issue_json(response.body)
@@ -46,7 +45,7 @@ module Jira
 
     def search(jql)
       response = checking_success do
-        @conn.get "#{API_BASE}/search", jql: jql
+        @conn.get "#@api_base/search", jql: jql
       end
       parse_issues_json(response.body)
     end
