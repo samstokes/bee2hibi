@@ -6,21 +6,21 @@ module JiraToHibi
       @jira_user = @jira.user
     end
 
-    def sync(sprint)
-      sprint_issues = get_sprint_issues(sprint)
+    def sync
+      my_issues = get_my_issues
 
-      sync_issues_to_hibi(sprint_issues)
+      sync_issues_to_hibi(my_issues)
 
       active_issue_tasks = get_active_issue_tasks
 
-      update_existing_hibi_tasks(active_issue_tasks, sprint_issues)
+      update_existing_hibi_tasks(active_issue_tasks, my_issues)
     end
 
     private
-    def get_sprint_issues(sprint)
-      puts "Getting issues for sprint #{sprint}"
+    def get_my_issues
+      puts "Getting issues for #@jira_user"
 
-      @jira.my_issues(sprint).tap do |issues|
+      @jira.my_issues.tap do |issues|
         puts "Got #{issues.size} issues from Jira: #{issues.map(&:key).join(', ')}"
       end
     end

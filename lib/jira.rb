@@ -38,8 +38,8 @@ module Jira
       parse_issue_json(response.body)
     end
 
-    def my_issues(sprint)
-      jql = jql_my_issues(sprint)
+    def my_issues
+      jql = jql_my_issues
       search(jql)
     end
 
@@ -105,15 +105,11 @@ module Jira
       end
     end
 
-    def jql_my_issues(sprint)
+    def jql_my_issues
       assignee_p = 'assignee=currentUser()'
       in_progress_p = 'status NOT IN (Open, Reopened, Closed, Completed, Blocked)'
-      relevant_p = if sprint
-        current_sprint_p = "sprint='#{sprint}' AND status IN (Open, Reopened)"
-        "(#{current_sprint_p}) OR (#{in_progress_p})"
-      else
-        in_progress_p
-      end
+      current_sprint_p = "sprint IN openSprints() AND status IN (Open, Reopened)"
+      relevant_p = "(#{current_sprint_p}) OR (#{in_progress_p})"
       orders = ['status']
       "(#{assignee_p}) AND (#{relevant_p}) ORDER BY #{orders.join(', ')}"
     end
