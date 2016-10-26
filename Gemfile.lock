@@ -10,6 +10,8 @@ GEM
     rack (1.6.4)
     rack-protection (1.5.3)
       rack
+    sentry-raven (2.1.2)
+      faraday (>= 0.7.6, < 0.10.x)
     sinatra (1.4.7)
       rack (~> 1.5)
       rack-protection (~> 1.4)
@@ -24,6 +26,7 @@ DEPENDENCIES
   faraday
   json
   puma
+  sentry-raven
   sinatra
 
 BUNDLED WITH

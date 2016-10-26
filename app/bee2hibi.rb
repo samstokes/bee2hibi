@@ -1,4 +1,5 @@
 require 'json'
+require 'raven'
 require 'sinatra/base'
 
 require 'hibi'
@@ -14,6 +15,8 @@ BEEMINDER_USER = ENV.fetch('BEEMINDER_USER')
 
 WEBHOOK_PASSWORD = ENV['WEBHOOK_PASSWORD']
 
+SENTRY_DSN = ENV['SENTRY_DSN']
+
 SOURCE_BEEMINDER = 'bee'
 THRESHOLD = 24 * 60 * 60
 
@@ -25,6 +28,14 @@ class Bee2Hibi < Sinatra::Application
   end
 
   use PasswordParamAuth, WEBHOOK_PASSWORD if WEBHOOK_PASSWORD
+
+  if SENTRY_DSN
+    Raven.configure do |config|
+      config.dsn = SENTRY_DSN
+    end
+
+    use Raven::Rack
+  end
 
   post '/reminder' do
     json = JSON.parse(request.body.read)
