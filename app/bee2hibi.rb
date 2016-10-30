@@ -15,6 +15,8 @@ BEEMINDER_USER = ENV.fetch('BEEMINDER_USER')
 
 WEBHOOK_PASSWORD = ENV['WEBHOOK_PASSWORD']
 
+UTC_OFFSET = ENV['UTC_OFFSET'] || Time.now.strftime('%:z')
+
 SENTRY_DSN = ENV['SENTRY_DSN']
 
 SOURCE_BEEMINDER = 'bee'
@@ -44,7 +46,7 @@ class Bee2Hibi < Sinatra::Application
     now = Time.now
 
     slug = goal.fetch('slug')
-    task_id = "#{slug}_#{now.strftime '%Y-%m-%d'}"
+    task_id = "#{slug}_#{datestamp now}"
 
     logger.info "Got reminder for task #{task_id}"
 
@@ -81,5 +83,9 @@ class Bee2Hibi < Sinatra::Application
   private
   def goal_url(goal)
     "https://beeminder.com/#{BEEMINDER_USER}/#{goal.fetch 'slug'}"
+  end
+
+  def datestamp(time)
+    time.clone.localtime(UTC_OFFSET).strftime('%Y-%m-%d')
   end
 end
