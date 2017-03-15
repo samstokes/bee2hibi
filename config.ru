@@ -1,7 +1,4 @@
-if ENV['RACK_ENV'] != 'production'
-  require 'dotenv'
-  Dotenv.load
-end
+require './config/env'
 
 $LOAD_PATH << File.expand_path('./lib')
 
