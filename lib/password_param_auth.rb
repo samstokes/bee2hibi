@@ -1,3 +1,5 @@
+require 'rack/honeycomb'
+
 class PasswordParamAuth
   def initialize(app, password)
     raise if app.nil?
@@ -8,12 +10,17 @@ class PasswordParamAuth
   def call(env)
     req = Rack::Request.new(env)
 
-    return unauthorized("What's the ?password") unless req.params.key?('password')
+    unless req.params.key?('password')
+      Rack::Honeycomb.add_field(env, :authenticated, false)
+      return unauthorized("What's the ?password")
+    end
 
     if @password == req.params['password']
+      Rack::Honeycomb.add_field(env, :authenticated, true)
       return @app.call(env)
     end
 
+    Rack::Honeycomb.add_field(env, :authenticated, 'bad')
     unauthorized("?password incorrect")
   end
 

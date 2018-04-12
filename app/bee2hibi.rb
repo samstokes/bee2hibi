@@ -1,4 +1,5 @@
 require 'json'
+require 'honeycomb-beeline/auto_install'
 require 'raven'
 require 'sinatra/base'
 
@@ -46,17 +47,22 @@ class Bee2Hibi < Sinatra::Application
     now = Time.now
 
     slug = goal.fetch('slug')
+    add_honeycomb_field :goal_slug, slug
     task_id = "#{slug}_#{datestamp now}"
+    add_honeycomb_field :task_id, task_id
 
     logger.info "Got reminder for task #{task_id}"
 
     goal_title = goal.fetch('title')
     pledge = goal.fetch('pledge')
+    add_honeycomb_field :pledge, pledge
     time_left_seconds = goal.fetch('losedate') - now.to_i
+    add_honeycomb_field :time_left_seconds, time_left_seconds
     time_left_hours = time_left_seconds / 3600
 
     if time_left_seconds > THRESHOLD
       logger.info "Ignored task #{task_id} due to #{time_left_hours} hours left"
+      add_honeycomb_field :ignored, true
       status 202
       return "ignored due to #{time_left_hours} hours left"
     end
@@ -76,6 +82,7 @@ class Bee2Hibi < Sinatra::Application
     result = @hibi.create_or_update_task(task)
     logger.info "Updated task #{task_id} in Hibi"
 
+    add_honeycomb_field :hibi_post_status, result.status
     status result.status
     result.body
   end
