@@ -1,5 +1,5 @@
 require 'json'
-require 'honeycomb-beeline/auto_install'
+require 'honeycomb-beeline'
 require 'raven'
 require 'sinatra/base'
 
@@ -22,6 +22,8 @@ SENTRY_DSN = ENV['SENTRY_DSN']
 
 SOURCE_BEEMINDER = 'bee'
 THRESHOLD = 24 * 60 * 60
+
+Honeycomb.init service_name: 'bee2hibi'
 
 class Bee2Hibi < Sinatra::Application
   def initialize
